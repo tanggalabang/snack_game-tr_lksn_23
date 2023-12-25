@@ -1,0 +1,108 @@
+<canvas id="gc" width="400" height="400"></canvas>
+
+<script>
+  // event listener yang memanggil fungsi tertentu setelah semua elemen HTML telah dimuat sepenuhnya.
+  window.onload = function () {
+    canv = document.getElementById("gc");
+    // Mendapatkan konteks 2D dari elemen canvas, yang akan digunakan untuk menggambar di dalam canvas.
+    ctx = canv.getContext("2d");
+    // Menambahkan event listener pada dokumen yang mendengarkan ketika tombol keyboard ditekan. Ketika tombol ditekan, fungsi keyPush akan dipanggil.
+    document.addEventListener("keydown", keyPush);
+    // Mengatur interval untuk memanggil fungsi game dengan interval waktu 15 kali per detik (dalam kasus ini, setiap 66.67 milidetik).
+    setInterval(game, 1000 / 15);
+  };
+
+  // Koordinat awal untuk posisi ular
+  px = py = 10;
+  // gs adalah ukuran grid, tc adalah jumlah grid
+  gs = tc = 20;
+  // Koordinat  untuk posisi makanan (apel)
+  ax = ay = 15;
+  // Komponen vektor untuk kecepatan ular pada sumbu x dan y.
+  xv = yv = 0;
+  // Array yang menyimpan jejak dari ular.
+  trail = [];
+  // Panjang awal ular
+  tail = 5;
+
+  function game() {
+    px += xv;
+    py += yv;
+
+    // Jika ular melewati batas layar sebelah kiri (koordinat x kurang dari 0),
+    // maka posisi ular diatur ke batas sebelah kanan layar (tc - 1).
+    // Hal ini memberikan efek ular yang muncul dari sisi kanan setelah menabrak sisi kiri.
+    if (px < 0) {
+      px = tc - 1;
+    }
+    // kebalikanya
+    if (px > tc - 1) {
+      px = 0;
+    }
+    // konsep sama dengan sumbu x
+    if (py < 0) {
+      py = tc - 1;
+    }
+    if (py > tc - 1) {
+      py = 0;
+    }
+
+    // Menggambar latar belakang:
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canv.width, canv.height);
+
+    // Menggambar jejak ular:
+    ctx.fillStyle = "lime";
+    for (var i = 0; i < trail.length; i++) {
+      ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
+
+      // Jika salah satu jejak ular bertabrakan dengan posisi kepala ular (px dan py), 
+      // variabel tail diatur ke nilai 5, yang kemudian akan mengatur ulang panjang ular ke nilai awal jika ada tabrakan.
+      if (trail[i].x == px && trail[i].y == py) {
+        tail = 5;
+      }
+    }
+
+    // Mengelola jejak ular:
+    trail.push({ x: px, y: py });
+    while (trail.length > tail) {
+      trail.shift();
+    }
+
+    // Menggambar makanan (apel):
+    // memeriksa apakah makanan himpit dengan kepala ular
+    if (ax == px && ay == py) {
+      tail++;
+      ax = Math.floor(Math.random() * tc);
+      ay = Math.floor(Math.random() * tc);
+    }
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(ax * gs, ay * gs, gs - 2, gs - 2);
+  }
+
+  function keyPush(evt) {
+    switch (evt.keyCode) {
+      // kiri
+      case 37:
+        xv = -1;
+        yv = 0;
+        break;
+      // atas
+      case 38:
+        xv = 0;
+        yv = -1;
+        break;
+      // kanan
+      case 39:
+        xv = 1;
+        yv = 0;
+        break;
+      // bawah
+      case 40:
+        xv = 0;
+        yv = 1;
+        break;
+    }
+  }
+</script>
